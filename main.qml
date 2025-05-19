@@ -64,80 +64,73 @@ opacity: brightness
 }
 
 MouseArea {
-    id: dragArea
-    anchors.fill: parent
-    onPressed: function(mouse) {
-        googleButton.startX = mouse.x;
-        googleButton.startY = mouse.y;
-    }
-    onClicked: webPopup.visible = true
-    onPositionChanged: function(mouse) {
-        let newX = googleButton.x + (mouse.x - googleButton.startX);
-        let newY = googleButton.y + (mouse.y - googleButton.startY);
+id: dragArea
+anchors.fill: parent
+onPressed: function(mouse) {
+googleButton.startX = mouse.x;
+googleButton.startY = mouse.y;
+}
+onClicked: webPopup.visible = true
+onPositionChanged: function(mouse) {
+let newX = googleButton.x + (mouse.x - googleButton.startX);
+let newY = googleButton.y + (mouse.y - googleButton.startY);
 
-        // Ensure the button stays within the screen boundaries
-        googleButton.x = Math.max(0, Math.min(newX, root.width - googleButton.width));
-        googleButton.y = Math.max(clockBar.height, Math.min(newY, root.height - googleButton.height));
+// Ensure the button stays within the screen boundaries
+googleButton.x = Math.max(0, Math.min(newX, root.width - googleButton.width));
+googleButton.y = Math.max(clockBar.height, Math.min(newY, root.height - googleButton.height));
 
-        // Collision detection with menu
-        if (googleButton.x + googleButton.width > menuContainer.x &&
-            googleButton.x < menuContainer.x + menuContainer.width &&
-            googleButton.y + googleButton.height > menuContainer.y &&
-            googleButton.y < menuContainer.y + menuContainer.height) {
-            googleButton.y = menuContainer.y + menuContainer.height; // Push button below menu when colliding
-        }
-    }
+// Collision detection with menu
+if (googleButton.x + googleButton.width > menuContainer.x &&
+googleButton.x < menuContainer.x + menuContainer.width &&
+googleButton.y + googleButton.height > menuContainer.y &&
+googleButton.y < menuContainer.y + menuContainer.height) {
+googleButton.y = menuContainer.y + menuContainer.height; // Push button below menu when colliding
+}
+}
 }
 
-
 }
-
 
 Rectangle {
-    id: clockBar
-    width: root.width
-    height: 19
-    color: theme ? "#555" : "#ddd"
-    opacity: brightness
-    z: 1 // Outermost layer
+id: clockBar
+width: root.width
+height: 19
+color: theme ? "#555" : "#ddd"
+opacity: brightness
+z: 1 // Outermost layer
 
-    property var _now: new Date()
-    property string manualTime: ""
+property var _now: new Date()
+property string manualTime: ""
 
-    Text {
-        id: clockDisplay
-        anchors.centerIn: parent
-        text: clockBar.manualTime !== "" ? clockBar.manualTime : Qt.formatDateTime(clockBar._now, "hh:mm:ss")
-        color: theme ? "white" : "black"
-        opacity: brightness
-    }
+Text {
+id: clockDisplay
+anchors.centerIn: parent
+text: clockBar.manualTime !== "" ? clockBar.manualTime : Qt.formatDateTime(clockBar._now, "hh:mm:ss")
+color: theme ? "white" : "black"
+opacity: brightness
+}
 
-
-
-    }
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            var now = new Date(); // Declare `now` inside the function
-            now.setUTCHours(now.getUTCHours() + 3); // Adjust to UTC+3
-            clockBar._now = now; // Store updated time
-            clockDisplay.text = Qt.formatDateTime(clockBar._now, "hh:mm:ss");
+}
+Timer {
+interval: 1000
+running: true
+repeat: true
+onTriggered: {
+var now = new Date(); // Declare `now` inside the function
+now.setUTCHours(now.getUTCHours() + 3); // Adjust to UTC+3
+clockBar._now = now; // Store updated time
+clockDisplay.text = Qt.formatDateTime(clockBar._now, "hh:mm:ss");
 
 }
 }
-
-
-
 
 // Menu
 Rectangle {
 id: menuContainer
 width: root.width / 5
-height: expanded ? root.height / 2 : root.height / 10
-color: theme ? "#333" : "white"
-anchors.right: clockBar.right  // Stays aligned to the right
+height: expanded ? root.height / 8 : root.height / 10
+color: theme ? "#333" : "grey"
+anchors.right: clockBar.right // Stays aligned to the right
 anchors.top: clockBar.bottom
 radius: 5
 property bool expanded: false
@@ -180,35 +173,37 @@ height: 800
 color: "transparent"
 
 Button {
-        text: "⚙"
-        font.pixelSize: 50
-        onClicked: popup.visible = true
-        anchors.right: parent.right
-        y: 30
-        width: 55
-        height: 55
+text: " ⚙ "
+font.pixelSize: 50
+onClicked: popup.visible = true
+anchors.left: parent.right // Stays aligned to the right
+y: 19
+width: 80
+height: 50
 
-        contentItem: Text {
-            text: parent.text
-            font.pixelSize: parent.font.pixelSize
-            color: "white"
+contentItem: Text {
+text: parent.text
+font.pixelSize: parent.font.pixelSize
+anchors.centerIn: parent
+color: theme ? "grey" : "#333"
+opacity: brightness
 
-        }
+}
 
-        background: Rectangle {
-            color: "#777"
-            radius: 10
-            border.color: "#555"
-            border.width: 2
+background: Rectangle {
+color: "#777"
+radius: 10
+border.color: "#555"
+border.width: 2
 
-            Rectangle {
-                width: parent.width
-                height: parent.height
-                radius: parent.radius
-                color: "#555"
-                anchors.centerIn: parent
-                opacity: brightness
-            }
+Rectangle {
+width: parent.width
+height: parent.height
+radius: parent.radius
+color: theme ? "#333" : "grey"
+anchors.centerIn: parent
+opacity: brightness
+}
 }
 }
 
@@ -231,24 +226,21 @@ property real startX: 0
 property real startY: 0
 
 MouseArea {
-    id: otherdragArea
-    anchors.fill: parent
-    onPressed: function(mouse) {
-        backgroundRect.startX = mouse.x;
-        backgroundRect.startY = mouse.y;
-    }
-    onPositionChanged: function(mouse) {
-        popup.x += mouse.x - backgroundRect.startX;
-        popup.y += mouse.y - backgroundRect.startY;
-    }
+id: otherdragArea
+anchors.fill: parent
+onPressed: function(mouse) {
+backgroundRect.startX = mouse.x;
+backgroundRect.startY = mouse.y;
+}
+onPositionChanged: function(mouse) {
+popup.x += mouse.x - backgroundRect.startX;
+popup.y += mouse.y - backgroundRect.startY;
+}
 }
 
 Column {
 spacing: 20
 anchors.centerIn: parent
-
-
-
 
 Slider {
 id: brightnessSlider
@@ -294,8 +286,8 @@ anchors.bottom: menuContainer.bottom
 
 Text {
 anchors.centerIn: parent
-text: "X"
-font.pixelSize: 50
+text: "Exit"
+font.pixelSize: 25
 font.family: "Arial"
 }
 
@@ -305,7 +297,6 @@ onClicked: Qt.quit()
 }
 
 }
-
 
 // Web Browser
 Rectangle {
@@ -345,23 +336,21 @@ color: theme ? "#black" : "#white"
 }
 
 MouseArea {
-    id: seconddragArea
-    anchors.fill: parent
-    onPressed: function(mouse) {
-        webPopup.startX = mouse.x;
-        webPopup.startY = mouse.y;
-    }
-    onPositionChanged: function(mouse) {
-        let newX = webPopup.x + (mouse.x - webPopup.startX);
-        let newY = webPopup.y + (mouse.y - webPopup.startY);
-
-        // Prevent window from moving off-screen
-        webPopup.x = Math.max(0, Math.min(newX, root.width - webPopup.width));
-        webPopup.y = Math.max(clockBar.height, Math.min(newY, root.height - webPopup.height));
-    }
+id: seconddragArea
+anchors.fill: parent
+onPressed: function(mouse) {
+webPopup.startX = mouse.x;
+webPopup.startY = mouse.y;
 }
+onPositionChanged: function(mouse) {
+let newX = webPopup.x + (mouse.x - webPopup.startX);
+let newY = webPopup.y + (mouse.y - webPopup.startY);
 
-
+// Prevent window from moving off-screen
+webPopup.x = Math.max(0, Math.min(newX, root.width - webPopup.width));
+webPopup.y = Math.max(clockBar.height, Math.min(newY, root.height - webPopup.height));
+}
+}
 
 // Restore down button
 Button {
