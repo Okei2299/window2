@@ -91,26 +91,82 @@ Window {
         }
     }
 
+
+    // Start up animation
+    Rectangle {
+        id: animationBoard
+        width: root.width
+        height: root.height
+        color: "black"
+        z: 2
+
+        Rectangle {
+            id: loadingCircle
+            width: 300
+            height: 300
+            radius: width / 2
+            border.width: 8
+            anchors.centerIn: animationBoard
+
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "purple" }
+                GradientStop { position: 1.0; color: "blue" }
+            }
+
+            NumberAnimation {
+                id: spinAnim
+                target: loadingCircle
+                property: "rotation"
+                from: 0
+                to: 360
+                duration: 10000
+                loops: Animation.Infinite
+                easing.type: Easing.Linear
+            }
+
+            Component.onCompleted: spinAnim.start()
+        }
+
+        Text {
+            id: loadingText
+            text: "Linux"
+            color: "#000C7B"
+            font.pixelSize: 100
+            font.bold: true
+            anchors.top: loadingCircle.bottom
+            anchors.horizontalCenter: loadingCircle.horizontalCenter
+        }
+
+        Timer {
+            interval: 10000
+            running: true
+            onTriggered: animationBoard.visible = false
+        }
+    }
+
+
     Rectangle {
         id: clockBar
         width: root.width
         height: 19
         color: theme ? "#555" : "#ddd"
         opacity: brightness
-        z: 1 // Outermost layer
+        z: 1
 
         property var _now: new Date()
         property string manualTime: ""
 
         Text {
-            id: clockDisplay
+            id: dateTimeDisplay
             anchors.centerIn: parent
-            text: clockBar.manualTime !== "" ? clockBar.manualTime : Qt.formatDateTime(clockBar._now, "hh:mm:ss")
+            text: (clockBar.manualTime !== "" ? clockBar.manualTime : Qt.formatDateTime(clockBar._now, "hh:mm"))
+                  + " " + Qt.formatDateTime(clockBar._now, "dd.MM")
+            font.pixelSize: 16
+            font.bold: true
             color: theme ? "white" : "black"
             opacity: brightness
         }
     }
-
 
     Timer {
         interval: 1000
@@ -118,13 +174,14 @@ Window {
         repeat: true
 
         onTriggered: {
-            var now = new Date(); // Declare `now` inside the function
+            var now = new Date();
             now.setUTCHours(now.getUTCHours() + 3); // Adjust to UTC+3
             clockBar._now = now; // Store updated time
-            clockDisplay.text = Qt.formatDateTime(clockBar._now, "hh:mm:ss");
 
+            dateTimeDisplay.text = Qt.formatDateTime(clockBar._now, "dd/MM") + " " + Qt.formatDateTime(clockBar._now, "hh.mm");
         }
     }
+
 
 // Menu
 Rectangle {
@@ -300,6 +357,9 @@ Rectangle {
 
 }
 
+
+
+
 // Web Browser
 Rectangle {
     id: mainContainer
@@ -442,3 +502,4 @@ Rectangle {
         }
     }
 }
+
