@@ -41,6 +41,59 @@ Window {
         }
     }
 
+    // Weather Button
+    Button {
+        id: weatherButton
+        property real startX: 0
+        property real startY: 0
+        width: 100
+        height: 100
+        y: 200
+        x: 500
+        text: "Weather"
+        font.bold: true
+        font.pixelSize: 18
+        opacity: brightness
+
+        background: Rectangle {
+            color: theme ? "grey" : "lightgrey"
+            border.color: theme ? "white" : "black"
+            border.width: 2
+            opacity: brightness
+        }
+
+        MouseArea {
+            id: weatherdragArea
+            anchors.fill: parent
+
+            onPressed: function(mouse) {
+                weatherButton.startX = mouse.x;
+                weatherButton.startY = mouse.y;
+            }
+            onClicked: weatherwebPopup.visible = true
+
+            onPositionChanged: function(mouse) {
+                let newX = weatherButton.x + (mouse.x - weatherButton.startX);
+                let newY = weatherButton.y + (mouse.y - weatherButton.startY);
+
+                // Ensure the button stays within the screen boundaries
+                weatherButton.x = Math.max(0, Math.min(newX, root.width - weatherButton.width));
+                weatherButton.y = Math.max(clockBar.height, Math.min(newY, root.height - weatherButton.height));
+
+                // Collision detection with menu
+                if (weatherButton.x + weatherButton.width > menuContainer.x &&
+                    weatherButton.x < menuContainer.x + menuContainer.width &&
+                    weatherButton.y + weatherButton.height > menuContainer.y &&
+                    weatherButton.y < menuContainer.y + menuContainer.height) {
+                    weatherButton.y = menuContainer.y + menuContainer.height; // Push button below menu when colliding
+                }
+            }
+        }
+    }
+
+
+
+
     // Google Button
     Button {
         id: googleButton
@@ -63,14 +116,14 @@ Window {
         }
 
         MouseArea {
-            id: dragArea
+            id: googledragArea
             anchors.fill: parent
 
             onPressed: function(mouse) {
                 googleButton.startX = mouse.x;
                 googleButton.startY = mouse.y;
             }
-            onClicked: webPopup.visible = true
+            onClicked: googlewebPopup.visible = true
 
             onPositionChanged: function(mouse) {
                 let newX = googleButton.x + (mouse.x - googleButton.startX);
@@ -360,22 +413,25 @@ Rectangle {
 
 
 
-// Web Browser
+
+
+
+// Weather webwindow
 Rectangle {
-    id: mainContainer
+    id: weathermainContainer
     width: parent.width
     height: parent.height
     color: "transparent"
 
     Rectangle {
-        id: webPopup
+        id: weatherwebPopup
         property bool isMaximized: false
         property real startX: 0
         property real startY: 0
         width: 600
         height: 400
-        x: (mainContainer.width - width) / 2
-        y: Math.max(clockBar.height, (mainContainer.height - height) / 2) // Prevent moving over the clock
+        x: (weathermainContainer.width - width) / 2
+        y: Math.max(clockBar.height, (weathermainContainer.height - height) / 2) // Prevent moving over the clock
         visible: false
         z: 100
         border.color: "#222222"
@@ -383,13 +439,13 @@ Rectangle {
         color: theme ? "#737373" : "#aaa"
 
         Rectangle {
-            id: titleBar
+            id: weathertitleBar
             width: parent.width
             height: 40
             color: theme ? "#444" : "#aaa"
 
             Text {
-                text: "Google Chromium"
+                text: "Foreca"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.margins: 10
@@ -398,37 +454,37 @@ Rectangle {
             }
 
             MouseArea {
-                id: seconddragArea
+                id: weatherseconddragArea
                 anchors.fill: parent
                 onPressed: function(mouse) {
-                    webPopup.startX = mouse.x;
-                    webPopup.startY = mouse.y;
+                    weatherwebPopup.startX = mouse.x;
+                    weatherwebPopup.startY = mouse.y;
                 }
                 onPositionChanged: function(mouse) {
-                    let newX = webPopup.x + (mouse.x - webPopup.startX);
-                    let newY = webPopup.y + (mouse.y - webPopup.startY);
+                    let newX = weatherwebPopup.x + (mouse.x - weatherwebPopup.startX);
+                    let newY = weatherwebPopup.y + (mouse.y - weatherwebPopup.startY);
 
                     // Prevent window from moving off-screen
-                    webPopup.x = Math.max(0, Math.min(newX, root.width - webPopup.width));
-                    webPopup.y = Math.max(clockBar.height, Math.min(newY, root.height - webPopup.height));
+                    weatherwebPopup.x = Math.max(0, Math.min(newX, root.width - weatherwebPopup.width));
+                    weatherwebPopup.y = Math.max(clockBar.height, Math.min(newY, root.height - weatherwebPopup.height));
                 }
             }
 
             // Restore down button
             Button {
-                id: restoreButton
-                anchors.right: closeButton.left
+                id: weatherrestoreButton
+                anchors.right: weathercloseButton.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 5
-                visible: webPopup.isMaximized
+                visible: weatherwebPopup.isMaximized
                 onClicked: {
-                    webPopup.width = 600;
-                    webPopup.height = 400;
-                    webPopup.x = (mainContainer.width - webPopup.width) / 2;
-                    webPopup.y = (mainContainer.height - webPopup.height) / 2;
-                    webPopup.isMaximized = false;
-                    restoreButton.visible = false;
-                    maximizeButton.visible = true;
+                    weatherwebPopup.width = 600;
+                    weatherwebPopup.height = 400;
+                    weatherwebPopup.x = (weathermainContainer.width - weatherwebPopup.width) / 2;
+                    weatherwebPopup.y = (weathermainContainer.height - weatherwebPopup.height) / 2;
+                    weatherwebPopup.isMaximized = false;
+                    weatherrestoreButton.visible = false;
+                    weathermaximizeButton.visible = true;
                 }
                 background: Rectangle {
                     color: "#AAAAAA"
@@ -444,19 +500,19 @@ Rectangle {
 
             // Maximize button
             Button {
-                id: maximizeButton
-                anchors.right: restoreButton.left
+                id: weathermaximizeButton
+                anchors.right: weatherrestoreButton.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 5
-                visible: !webPopup.isMaximized
+                visible: !weatherwebPopup.isMaximized
                 onClicked: {
-                    webPopup.width = mainContainer.width;
-                    webPopup.height = mainContainer.height - clockBar.height; // Adjusted height
-                    webPopup.x = 0;
-                    webPopup.y = clockBar.height;
-                    webPopup.isMaximized = true;
-                    maximizeButton.visible = false;
-                    restoreButton.visible = true;
+                    weatherwebPopup.width = weathermainContainer.width;
+                    weatherwebPopup.height = weathermainContainer.height - clockBar.height; // Adjusted height
+                    weatherwebPopup.x = 0;
+                    weatherwebPopup.y = clockBar.height;
+                    weatherwebPopup.isMaximized = true;
+                    weathermaximizeButton.visible = false;
+                    weatherrestoreButton.visible = true;
                 }
                 background: Rectangle {
                     color: "#AAAAAA"
@@ -472,11 +528,11 @@ Rectangle {
 
             // Close button
             Button {
-                id: closeButton
+                id: weathercloseButton
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 5
-                onClicked: webPopup.visible = false
+                onClicked: weatherwebPopup.visible = false
                 background: Rectangle {
                     color: "#E95420"
                     radius: 5
@@ -491,15 +547,162 @@ Rectangle {
         }
 
         WebEngineView {
-            id: webView
+            id: weatherwebView
             width: parent.width - 20
-            height: parent.height - titleBar.height - 20
+            height: parent.height - weathertitleBar.height - 20
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: titleBar.bottom
+            anchors.top: weathertitleBar.bottom
             anchors.margins: 10
-            url: "https://www.google.com/"
+        url: "https://www.foreca.fi/Finland/Lemp%C3%A4%C3%A4l%C3%A4/10vrk"
+    }
+}
+
+
+
+
+
+
+
+// Google's Browser
+Rectangle {
+    id: googlemainContainer
+    width: parent.width
+    height: parent.height
+    color: "transparent"
+
+    Rectangle {
+        id: googlewebPopup
+        property bool isMaximized: false
+        property real startX: 0
+        property real startY: 0
+        width: 600
+        height: 400
+        x: (googlemainContainer.width - width) / 2
+        y: Math.max(clockBar.height, (googlemainContainer.height - height) / 2) // Prevent moving over the clock
+        visible: false
+        z: 100
+        border.color: "#222222"
+        border.width: 2
+        color: theme ? "#737373" : "#aaa"
+
+        Rectangle {
+            id: googletitleBar
+            width: parent.width
+            height: 40
+            color: theme ? "#444" : "#aaa"
+
+            Text {
+                text: "Google Chromium"
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.margins: 10
+                font.pixelSize: 16
+                color: theme ? "#black" : "#white"
+            }
+
+            MouseArea {
+                id: googleseconddragArea
+                anchors.fill: parent
+                onPressed: function(mouse) {
+                    googlewebPopup.startX = mouse.x;
+                    googlewebPopup.startY = mouse.y;
+                }
+                onPositionChanged: function(mouse) {
+                    let newX = googlewebPopup.x + (mouse.x - googlewebPopup.startX);
+                    let newY = googlewebPopup.y + (mouse.y - googlewebPopup.startY);
+
+                    // Prevent window from moving off-screen
+                    googlewebPopup.x = Math.max(0, Math.min(newX, root.width - googlewebPopup.width));
+                    googlewebPopup.y = Math.max(clockBar.height, Math.min(newY, root.height - googlewebPopup.height));
+                }
+            }
+
+            // Restore down button
+            Button {
+                id: googlerestoreButton
+                anchors.right: googlecloseButton.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: 5
+                visible: googlewebPopup.isMaximized
+                onClicked: {
+                    googlewebPopup.width = 600;
+                    googlewebPopup.height = 400;
+                    googlewebPopup.x = (googlemainContainer.width - googlewebPopup.width) / 2;
+                    googlewebPopup.y = (googlemainContainer.height - googlewebPopup.height) / 2;
+                    googlewebPopup.isMaximized = false;
+                    googlerestoreButton.visible = false;
+                    googlemaximizeButton.visible = true;
+                }
+                background: Rectangle {
+                    color: "#AAAAAA"
+                    radius: 5
+                }
+                contentItem: Text {
+                    text: " 🗗 "
+                    font.pixelSize: 16
+                    font.bold: true
+                    color: "black"
+                }
+            }
+
+            // Maximize button
+            Button {
+                id: googlemaximizeButton
+                anchors.right: googlerestoreButton.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: 5
+                visible: !googlewebPopup.isMaximized
+                onClicked: {
+                    googlewebPopup.width = googlemainContainer.width;
+                    googlewebPopup.height = googlemainContainer.height - clockBar.height; // Adjusted height
+                    googlewebPopup.x = 0;
+                    googlewebPopup.y = clockBar.height;
+                    googlewebPopup.isMaximized = true;
+                    googlemaximizeButton.visible = false;
+                    googlerestoreButton.visible = true;
+                }
+                background: Rectangle {
+                    color: "#AAAAAA"
+                    radius: 5
+                }
+                contentItem: Text {
+                    text: " 🗖 "
+                    font.pixelSize: 16
+                    font.bold: true
+                    color: "black"
+                }
+            }
+
+            // Close button
+            Button {
+                id: googlecloseButton
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: 5
+                onClicked: googlewebPopup.visible = false
+                background: Rectangle {
+                    color: "#E95420"
+                    radius: 5
+                }
+                contentItem: Text {
+                    text: " ✖ "
+                    font.pixelSize: 16
+                    font.bold: true
+                    color: "white"
+                }
+            }
+        }
+
+            WebEngineView {
+                id: googlewebView
+                width: parent.width - 20
+                height: parent.height - googletitleBar.height - 20
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: googletitleBar.bottom
+                anchors.margins: 10
+                url: "https://www.google.com/"
+                }
             }
         }
     }
 }
-
